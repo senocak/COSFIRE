@@ -32,3 +32,6 @@ class FunctionFilter(BaseEstimator, TransformerMixin):
             image: image
         """
         return self.filter_function(image, *self.pargs, **self.kwargs)
+
+def guassianFilter(image, sigmaX, sigmaY, theta):
+    
