@@ -1,7 +1,7 @@
 from .template import (TemplateEstimator, TemplateClassifier,
                        TemplateTransformer)
 
-from .base import (FunctionFilter)
+from .base import (FunctionFilter, gaussianFilter)
 
 __all__ = ['TemplateEstimator', 'TemplateClassifier',
-           'TemplateTransformer', 'FunctionFilter']
+           'TemplateTransformer', 'FunctionFilter', 'gaussianFilter']

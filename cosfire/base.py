@@ -1,6 +1,10 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 from PIL import Image
+import math as m
+import scipy.signal as signal
+import matplotlib.pyplot as plt
+
 
 class FunctionFilter(BaseEstimator, TransformerMixin):
     """
@@ -35,19 +39,17 @@ class FunctionFilter(BaseEstimator, TransformerMixin):
         """
         return self.filter_function(image, *self.pargs, **self.kwargs)
 
-def guassianFilter(image, sigmaX, sigmaY, theta):
+def gaussianFilter(image, sigmaX, sigmaY, theta):
     
     gaussian = np.zeros(shape=image.shape);
-    cx = image.shape[0]/2;
-    cy = image.shape[1]/2;
+    cx = (gaussian.shape[0]-1)/2;
+    cy = (gaussian.shape[1]-1)/2;
 
-    a = (cos(theta)^2)/(2*sigmaX*sigmaX) + (sin(theta)^2)/(2*sigmaY*sigmaY);
-    b = (-sin(2*theta))/(4*sigmaX*sigmaX) + (sin(2*theta))/(4*sigmaY*sigmaY);
-    c = (sin(theta)^2)/(2*sigmaX*sigmaX) + (cos(theta)^2)/(2*sigmaY*sigmaY);
+    a = (m.cos(theta)**2)/(2*sigmaX*sigmaX) + (m.sin(theta)**2)/(2*sigmaY*sigmaY);
+    b = (-m.sin(2*theta))/(4*sigmaX*sigmaX) + (m.sin(2*theta))/(4*sigmaY*sigmaY);
+    c = (m.sin(theta)**2)/(2*sigmaX*sigmaX) + (m.cos(theta)**2)/(2*sigmaY*sigmaY);
 
     for (x,y), value in np.ndenumerate(gaussian) :
-        print(x - cx,y - cy,value)
+        gaussian[x,y] = m.exp(-( (a*(x-cx))**2 + 2*b*(x-cx)*(y-cy) + (c*(y-cy))**2));
 
-
-img = np.asarray(Image.open('rhino.png').convert('L'))
-guassianFilter(img, 0, 0, 0);
+    return signal.convolve(image, gaussian, mode='same');
