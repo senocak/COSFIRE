@@ -1,4 +1,6 @@
 from sklearn.base import BaseEstimator, TransformerMixin
+import numpy as np
+from PIL import Image
 
 class FunctionFilter(BaseEstimator, TransformerMixin):
     """
@@ -35,3 +37,17 @@ class FunctionFilter(BaseEstimator, TransformerMixin):
 
 def guassianFilter(image, sigmaX, sigmaY, theta):
     
+    gaussian = np.zeros(shape=image.shape);
+    cx = image.shape[0]/2;
+    cy = image.shape[1]/2;
+
+    a = (cos(theta)^2)/(2*sigmaX*sigmaX) + (sin(theta)^2)/(2*sigmaY*sigmaY);
+    b = (-sin(2*theta))/(4*sigmaX*sigmaX) + (sin(2*theta))/(4*sigmaY*sigmaY);
+    c = (sin(theta)^2)/(2*sigmaX*sigmaX) + (cos(theta)^2)/(2*sigmaY*sigmaY);
+
+    for (x,y), value in np.ndenumerate(gaussian) :
+        print(x - cx,y - cy,value)
+
+
+img = np.asarray(Image.open('rhino.png').convert('L'))
+guassianFilter(img, 0, 0, 0);
