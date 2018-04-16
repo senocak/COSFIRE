@@ -3,35 +3,17 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import scipy.signal as signal
 import cosfire as cosf
+import numpy as np
 
-filt = cosf.FunctionFilter(cosf.gaussianFilter, 1, 1, 0);
+filt = cosf.FunctionFilter(cosf.differenceOfGaussians, 2, 2, 1);
+imgoriginal = numpy.asarray(Image.open('rhino.png').convert('L'))
+img = filt.fit().transform(imgoriginal);
+img = cosf.normalize(img);
 
-img = numpy.asarray(Image.open('rhino.png').convert('L'))
+for (x,y), value in np.ndenumerate(img):
+	img[x,y] = 0 if value < 0.4 else 1;
 
-'''
-gaus = numpy.matrix(
-'2 4 5 4 2;'+
-'4 9 12 9 4;'+
-'5 12 15 12 5;'+
-'4 9 12 9 4;'+
-'2 4 5 4 2');
-edge = numpy.matrix(
-'1 4 1;'+
-'4 -20 4;'+
-'1 4 1'
-);
-print(edge);
 print(img);
-img = signal.convolve(img, edge, mode='same');
-'''
 
-img = filt.transform(img);
-
-
-# Normalization:
-#imgTransformed -= imgTransformed.min();
-#imgTransformed = imgTransformed/imgTransformed.max();
-
-
-plt.imshow(img, cmap='gray')
+plt.imshow(img+imgoriginal, cmap='gray')
 plt.show()

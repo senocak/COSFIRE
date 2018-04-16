@@ -3,8 +3,7 @@ import numpy as np
 from PIL import Image
 import math as m
 import scipy.signal as signal
-import matplotlib.pyplot as plt
-
+import scipy.ndimage.filters as scipyfilter
 
 class FunctionFilter(BaseEstimator, TransformerMixin):
     """
@@ -39,17 +38,27 @@ class FunctionFilter(BaseEstimator, TransformerMixin):
         """
         return self.filter_function(image, *self.pargs, **self.kwargs)
 
-def gaussianFilter(image, sigmaX, sigmaY, theta):
-    
-    gaussian = np.zeros(shape=image.shape);
-    cx = (gaussian.shape[0]-1)/2;
-    cy = (gaussian.shape[1]-1)/2;
+def gaussianFilter(image, sigma):
+    return filters.gaussian_filter(image, sigma);
 
-    a = (m.cos(theta)**2)/(2*sigmaX*sigmaX) + (m.sin(theta)**2)/(2*sigmaY*sigmaY);
-    b = (-m.sin(2*theta))/(4*sigmaX*sigmaX) + (m.sin(2*theta))/(4*sigmaY*sigmaY);
-    c = (m.sin(theta)**2)/(2*sigmaX*sigmaX) + (m.cos(theta)**2)/(2*sigmaY*sigmaY);
+def differenceOfGaussians(image, sigma, sigmaRatio, onoff=1):
 
-    for (x,y), value in np.ndenumerate(gaussian) :
-        gaussian[x,y] = m.exp(-( (a*(x-cx))**2 + 2*b*(x-cx)*(y-cy) + (c*(y-cy))**2));
+    sz = m.ceil(sigma*3)*2 + 1;
+    kernel1 = np.zeros((sz,sz));
+    kernel1[sz//2,sz//2] = 1;
+    kernel1 = scipyfilter.gaussian_filter(kernel1, sigma);
 
-    return signal.convolve(image, gaussian, mode='same');
+    kernel2 = np.zeros((sz,sz));
+    kernel2[sz//2,sz//2] = 1;
+    kernel2 = scipyfilter.gaussian_filter(kernel1, sigma*sigmaRatio);
+
+    if (onoff):
+        kernel = kernel2 - kernel1;
+    else:
+        kernel = kernel1 - kernel2;
+
+    return signal.convolve(image, kernel, mode='same');
+
+def normalize(image):
+    image -= image.min();
+    return image/image.max();
