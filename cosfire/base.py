@@ -4,6 +4,7 @@ from PIL import Image
 import math as m
 import scipy.signal as signal
 import scipy.ndimage.filters as scipyfilter
+import cv2
 
 class FunctionFilter(BaseEstimator, TransformerMixin):
     """
@@ -38,26 +39,20 @@ class FunctionFilter(BaseEstimator, TransformerMixin):
         """
         return self.filter_function(image, *self.pargs, **self.kwargs)
 
+
 def gaussianFilter(image, sigma):
-    return filters.gaussian_filter(image, sigma);
+    kernel = cv2.getGaussianKernel(m.ceil(sigma*3)*2 + 1, sigma);
+    return cv2.sepFilter2D(image, -1, kernel, kernel);
 
 def differenceOfGaussians(image, sigma, onoff, sigmaRatio=0.5):
-
-    sz = m.ceil(sigma*3)*2 + 1;
-    kernel1 = np.zeros((sz,sz));
-    kernel1[sz//2,sz//2] = 1;
-    kernel1 = scipyfilter.gaussian_filter(kernel1, sigma);
-
-    kernel2 = np.zeros((sz,sz));
-    kernel2[sz//2,sz//2] = 1;
-    kernel2 = scipyfilter.gaussian_filter(kernel1, sigma*sigmaRatio);
-
+    sz = m.ceil(sigma*3)*2 + 1;   # Guaranteed to be odd
+    kernel1 = cv2.getGaussianKernel(sz, sigma);
+    kernel2 = cv2.getGaussianKernel(sz, sigma*sigmaRatio);
     if (onoff):
         kernel = kernel2 - kernel1;
     else:
         kernel = kernel1 - kernel2;
-
-    return signal.convolve(image, kernel, mode='same');
+    return cv2.sepFilter2D(image, -1, kernel, kernel);
 
 def normalize(image):
     image -= image.min();
