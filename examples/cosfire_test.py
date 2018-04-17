@@ -6,7 +6,7 @@ import numpy as np
 import math as m
 import time
 
-proto = np.asarray(Image.open('prototype.png').convert('L'), dtype=np.float64)
+proto = np.asarray(Image.open('prototype2.png').convert('L'), dtype=np.float64)
 
 sigma = 2.6
 filt = cosfire.DoGFilter(sigma,1)
