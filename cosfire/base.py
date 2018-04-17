@@ -41,7 +41,7 @@ class FunctionFilter(BaseEstimator, TransformerMixin):
 def gaussianFilter(image, sigma):
     return filters.gaussian_filter(image, sigma);
 
-def differenceOfGaussians(image, sigma, sigmaRatio, onoff=1):
+def differenceOfGaussians(image, sigma, onoff, sigmaRatio=0.5):
 
     sz = m.ceil(sigma*3)*2 + 1;
     kernel1 = np.zeros((sz,sz));
