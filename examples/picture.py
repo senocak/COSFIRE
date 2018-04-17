@@ -4,10 +4,12 @@ import matplotlib.pyplot as plt
 import scipy.signal as signal
 import cosfire as cosf
 import numpy as np
+import math as m
 
-filt = cosf.FunctionFilter(cosf.gaussianFilter, 2);
+imgColor = numpy.asarray(Image.open('tomato.jpg').convert('RGB'))
+
+filt = cosf.FunctionFilter.Gabor(1, 0, 2, 1, 0.5*m.pi)
 img = numpy.asarray(Image.open('tomato.jpg').convert('L'))
-#imgColor = numpy.asarray(Image.open('tomato.jpg').convert('RGB'))
 img = filt.fit().transform(img);
 
 '''
@@ -36,5 +38,5 @@ imgRes[:,:,1] = imgRes[:,:,1]*img[:,:];
 imgRes[:,:,2] = imgRes[:,:,2]*img[:,:];
 '''
 
-plt.imshow(img, cmap='gray');
+plt.imshow(img, cmap='gray')
 plt.show()

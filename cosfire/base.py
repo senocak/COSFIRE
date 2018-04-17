@@ -1,10 +1,7 @@
 from sklearn.base import BaseEstimator, TransformerMixin
-import numpy as np
-from PIL import Image
 import math as m
-import scipy.signal as signal
-import scipy.ndimage.filters as scipyfilter
 import cv2
+import scipy.signal as signal
 
 class FunctionFilter(BaseEstimator, TransformerMixin):
     """
@@ -39,21 +36,33 @@ class FunctionFilter(BaseEstimator, TransformerMixin):
         """
         return self.filter_function(image, *self.pargs, **self.kwargs)
 
+    def Guassian(sigma):
+        kernel = cv2.getGaussianKernel(m.ceil(sigma*3)*2 + 1, sigma)
+        return FunctionFilter(_sepFilter2D, kernel)
 
-def gaussianFilter(image, sigma):
-    kernel = cv2.getGaussianKernel(m.ceil(sigma*3)*2 + 1, sigma);
-    return cv2.sepFilter2D(image, -1, kernel, kernel);
+    def DoG(sigma, onoff, sigmaRatio=0.5):
+        sz = m.ceil(sigma*3)*2 + 1;   # Guaranteed to be odd
+        kernel1 = cv2.getGaussianKernel(sz, sigma)
+        kernel2 = cv2.getGaussianKernel(sz, sigma*sigmaRatio)
+        if (onoff):
+            kernel = kernel2 - kernel1
+        else:
+            kernel = kernel1 - kernel2
+        return FunctionFilter(_sepFilter2D, kernel)
 
-def differenceOfGaussians(image, sigma, onoff, sigmaRatio=0.5):
-    sz = m.ceil(sigma*3)*2 + 1;   # Guaranteed to be odd
-    kernel1 = cv2.getGaussianKernel(sz, sigma);
-    kernel2 = cv2.getGaussianKernel(sz, sigma*sigmaRatio);
-    if (onoff):
-        kernel = kernel2 - kernel1;
-    else:
-        kernel = kernel1 - kernel2;
-    return cv2.sepFilter2D(image, -1, kernel, kernel);
+    def Gabor(sigma, theta, lambd, gamma, psi):
+        sz = m.ceil(sigma*3)*2 + 1;   # Guaranteed to be odd
+        kernel = cv2.getGaborKernel((sz, sz), sigma, theta, lambd, gamma, psi);
+        return FunctionFilter(_Filter2D, kernel);
+
+# Executes a 2D convolution by using a 1D kernel twice
+def _sepFilter2D(image, kernel):
+    return cv2.sepFilter2D(image, -1, kernel, kernel)
+
+# Executes a 2D convolution by using a 2D kernel
+def _Filter2D(image, kernel):
+    return signal.convolve(image, kernel, mode='same')
 
 def normalize(image):
-    image -= image.min();
-    return image/image.max();
+    image -= image.min()
+    return image/image.max()
