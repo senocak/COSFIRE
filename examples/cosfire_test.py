@@ -29,21 +29,27 @@ def getMaxima(vals):
 	return maxima
 
 # Find tuples
-rhoList = [0,15,30]
+rhoList = [0,20,40]
 (cx, cy) = (50,50)
+maximaCoords = []
 for rho in rhoList:
 	if rho == 0:
-		if protoDoG[cx,cy] > 0.2:
+		if protoDoG[cy,cx] > 0.2:
 			print((sigma, rho, 0))
+			maximaCoords.append([cx, cy])
 	elif rho > 0:
 		vals = np.zeros(12)
 		for i in range(0,12):
-			x = m.floor(cx + rho*m.sin(i*m.pi/6))
-			y = m.floor(cy - rho*m.cos(i*m.pi/6))
-			vals[i] = protoDoG[x,y]
+			x = m.floor(cx + rho*m.cos(i*m.pi/6))
+			y = m.floor(cy + rho*m.sin(i*m.pi/6))
+			vals[i] = protoDoG[y,x]
 		maxima = getMaxima(vals)
 		for phi in maxima:
 			print((sigma, rho, phi))
+			maximaCoords.append([cx + rho*m.cos(phi), cy - rho*m.sin(phi)])
 
+# Draw image
 plt.imshow(protoDoG, cmap='gray')
+maximaCoords = np.asarray(maximaCoords)
+plt.plot(maximaCoords[:,0], maximaCoords[:,1],"xr")
 plt.show()
