@@ -1,0 +1,49 @@
+from PIL import Image
+from peakutils.peak import indexes
+import matplotlib.pyplot as plt
+import cosfire
+import numpy as np
+import math as m
+import time
+
+proto = np.asarray(Image.open('prototype.png').convert('L'), dtype=np.float64)
+
+sigma = 2.6
+filt = cosfire.DoGFilter(sigma,1)
+protoDoG = filt.transform(proto)
+
+# Suppress
+maxVal = protoDoG.max()
+for (x,y), value in np.ndenumerate(protoDoG):
+	protoDoG[x,y] = 0 if value < 0.25*maxVal else value;
+
+# Hacky function to find maxima in a circular array
+def getMaxima(vals):
+	n = vals.size
+	circle = np.concatenate([vals,vals,vals])
+	index = indexes(circle, thres=0.2)
+	maxima = []
+	for i in range(index.size):
+		if index[i] >= n and index[i] < n*2:
+			maxima.append((2*m.pi/n) * (index[i]-n))
+	return maxima
+
+# Find tuples
+rhoList = [0,15,30]
+(cx, cy) = (50,50)
+for rho in rhoList:
+	if rho == 0:
+		if protoDoG[cx,cy] > 0.2:
+			print((sigma, rho, 0))
+	elif rho > 0:
+		vals = np.zeros(12)
+		for i in range(0,12):
+			x = m.floor(cx + rho*m.sin(i*m.pi/6))
+			y = m.floor(cy - rho*m.cos(i*m.pi/6))
+			vals[i] = protoDoG[x,y]
+		maxima = getMaxima(vals)
+		for phi in maxima:
+			print((sigma, rho, phi))
+
+plt.imshow(protoDoG, cmap='gray')
+plt.show()
