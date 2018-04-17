@@ -1,7 +1,4 @@
-from .template import (TemplateEstimator, TemplateClassifier,
-                       TemplateTransformer)
+from .base import (FunctionFilter)
+from .filters import (GaussianFilter, DoGFilter, GaborFilter, normalize)
 
-from .base import (FunctionFilter, normalize)
-
-__all__ = ['TemplateEstimator', 'TemplateClassifier',
-           'TemplateTransformer', 'FunctionFilter', 'normalize']
+__all__ = ['FunctionFilter', 'GaussianFilter', 'DoGFilter', 'GaborFilter', 'normalize']
