@@ -6,7 +6,7 @@ import numpy as np
 import math as m
 import time
 
-proto = np.asarray(Image.open('prototype1.png').convert('L'), dtype=np.float64)
+proto = np.asarray(Image.open('prototype4.png').convert('L'), dtype=np.float64)
 
 sigma = 2.6
 filt = cosfire.DoGFilter(sigma,1)
@@ -17,37 +17,20 @@ maxVal = protoDoG.max()
 for (x,y), value in np.ndenumerate(protoDoG):
 	protoDoG[x,y] = 0 if value < 0.25*maxVal else value;
 
-# Hacky function to find maxima in a circular array
-def getMaxima(vals):
-	n = vals.size
-	circle = np.concatenate([vals,vals,vals])
-	index = indexes(circle, thres=0.2, min_dist=0)
-	maxima = []
-	for i in range(index.size):
-		if index[i] >= n and index[i] < n*2:
-			maxima.append((2*m.pi/n) * (index[i]-n))
-	return maxima
-
 # Find tuples
 rhoList = [0,10,20,40]
 (cx, cy) = (50,50)
 maximaCoords = []
 numDegrees = 16
+peakFunction = cosfire.CircularPeaksFunction()
 for rho in rhoList:
 	if rho == 0:
-		if protoDoG[cy,cx] > 0.2:
-			print((sigma, rho, 0))
+		if protoDoG[cy,cx] > 0:
 			maximaCoords.append([cx, cy])
 	elif rho > 0:
-		vals = np.zeros(numDegrees)
-		for i in range(0,numDegrees):
-			x = m.floor(cx + rho*m.cos(i*m.pi/numDegrees*2))
-			y = m.floor(cy + rho*m.sin(i*m.pi/numDegrees*2))
-			vals[i] = protoDoG[y,x]
-		maxima = getMaxima(vals)
-		for phi in maxima:
-			print((sigma, rho, phi))
-			maximaCoords.append([cx + rho*m.cos(phi), cy + rho*m.sin(phi)])
+		vals = [protoDoG[m.floor(cy + rho*m.sin(i*m.pi/numDegrees*2)),m.floor(cx + rho*m.cos(i*m.pi/numDegrees*2))] for i in range(0,numDegrees)]
+		maxima = peakFunction.transform(vals)
+		maximaCoords.extend([[cx + rho*m.cos(phi*m.pi/numDegrees*2), cy + rho*m.sin(phi*m.pi/numDegrees*2)] for phi in maxima])
 
 # Draw image
 plt.imshow(protoDoG, cmap='gray')

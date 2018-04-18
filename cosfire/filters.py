@@ -37,7 +37,3 @@ def _Filter2D(image, kernel):
 
 def sigma2sz(sigma):
     return m.ceil(sigma*3)*2 + 1; # Guaranteed to be odd
-
-def normalize(image):
-    image -= image.min()
-    return image/image.max()
