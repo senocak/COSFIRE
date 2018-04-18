@@ -1,2 +1,7 @@
 nose>=1.1.2
 scikit-learn>=0.17
+pillow>=5.1.0
+numpy>=1.8.0
+scipy>=1.0.1
+opencv-python>=3.4.0
+peakutils>=1.1.1
